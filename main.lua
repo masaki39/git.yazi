@@ -12,10 +12,11 @@ local CODES = {
 	excluded = 990, -- ignored directory
 	ignored = 70,   -- ignored file
 	untracked = 60,
-	modified = 50,  -- unstaged modification (working tree)
-	mixed = 45,     -- staged + unstaged both present (MM, MT, etc.)
-	staged = 40,    -- staged only (index M or T, no working tree change)
+	modified = 50,      -- unstaged modification (working tree)
+	mixed = 45,         -- staged M/T + unstaged M/T both present (MM, MT, etc.)
+	staged = 40,        -- staged only (index M or T, no working tree change)
 	added = 30,
+	added_mixed = 25,   -- staged A/C + unstaged M/T (AM, etc.)
 	deleted = 20,
 	updated = 10,   -- merge conflict (U, DD, AD, etc.)
 	clean = 0,
@@ -24,9 +25,10 @@ local CODES = {
 local PATTERNS = {
 	{ "!$", CODES.ignored },
 	{ "?$", CODES.untracked },
-	{ "^[MT][MT]", CODES.mixed },   -- both chars M or T = staged + unstaged
-	{ "^[MT]", CODES.staged },      -- first char M or T = staged only
-	{ "[MT]", CODES.modified },     -- second char M or T = unstaged only
+	{ "^[MT][MT]", CODES.mixed },       -- both chars M or T = staged + unstaged
+	{ "^[AC][MT]", CODES.added_mixed }, -- staged A/C + unstaged M/T (e.g. AM)
+	{ "^[MT]", CODES.staged },          -- first char M or T = staged only
+	{ "[MT]", CODES.modified },         -- second char M or T = unstaged only
 	{ "[AC]", CODES.added },
 	{ "D", CODES.deleted },
 	{ "U", CODES.updated },
@@ -206,7 +208,9 @@ local function setup(st, opts)
 			return ""
 		elseif self._file.is_hovered then
 			if code == CODES.mixed then
-				return ui.Line { " ", signs[CODES.modified], signs[CODES.staged] }
+				return ui.Line { " ", signs[CODES.staged], signs[CODES.modified] }
+			elseif code == CODES.added_mixed then
+				return ui.Line { " ", signs[CODES.added], signs[CODES.modified] }
 			else
 				return ui.Line { " ", signs[code] }
 			end
@@ -214,8 +218,14 @@ local function setup(st, opts)
 			if code == CODES.mixed then
 				return ui.Line {
 					" ",
-					ui.Span(signs[CODES.modified]):style(styles[CODES.modified]),
 					ui.Span(signs[CODES.staged]):style(styles[CODES.staged]),
+					ui.Span(signs[CODES.modified]):style(styles[CODES.modified]),
+				}
+			elseif code == CODES.added_mixed then
+				return ui.Line {
+					" ",
+					ui.Span(signs[CODES.added]):style(styles[CODES.added]),
+					ui.Span(signs[CODES.modified]):style(styles[CODES.modified]),
 				}
 			else
 				return ui.Line { " ", ui.Span(signs[code]):style(styles[code]) }
