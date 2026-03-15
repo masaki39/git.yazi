@@ -38,10 +38,11 @@ run = "git"
 
 | Sign | Color | Meaning |
 |------|-------|---------|
-| `M` | red | Modified (unstaged) |
-| `M` | green | Modified (staged) |
-| `MM` | red+green | Modified (both staged and unstaged) |
+| `M` | green | Modified (staged only) |
+| `M` | red | Modified (unstaged only) |
+| `MM` | green+red | Modified (staged left, unstaged right) |
 | `A` | green | Added (staged) |
+| `AM` | green+red | Added and then modified (staged left, unstaged right) |
 | `??` | red | Untracked |
 | `!` | blue | Ignored |
 | `D` | red | Deleted |
