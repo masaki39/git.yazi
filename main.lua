@@ -16,7 +16,7 @@ local CODES = {
 	mixed = 45,         -- staged M/T + unstaged M/T both present (MM, MT, etc.)
 	staged = 40,        -- staged only (index M or T, no working tree change)
 	added = 30,
-	added_mixed = 25,   -- staged A/C + unstaged M/T (AM, etc.)
+	added_mixed = 35,   -- staged A/C + unstaged M/T (AM, etc.)
 	deleted = 20,
 	updated = 10,   -- merge conflict (U, DD, AD, etc.)
 	clean = 0,
@@ -212,7 +212,7 @@ local function setup(st, opts)
 			elseif code == CODES.added_mixed then
 				return ui.Line { " ", signs[CODES.added], signs[CODES.modified] }
 			else
-				return ui.Line { " ", signs[code] }
+				return signs[code] and ui.Line { " ", signs[code] } or ""
 			end
 		else
 			if code == CODES.mixed then
@@ -228,7 +228,7 @@ local function setup(st, opts)
 					ui.Span(signs[CODES.modified]):style(styles[CODES.modified]),
 				}
 			else
-				return ui.Line { " ", ui.Span(signs[code]):style(styles[code]) }
+				return signs[code] and ui.Line { " ", ui.Span(signs[code]):style(styles[code]) } or ""
 			end
 		end
 	end, opts.order)
